@@ -29,15 +29,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@SuppressWarnings("null") HttpServletRequest request, @SuppressWarnings("null") HttpServletResponse response, @SuppressWarnings("null") FilterChain chain)
             throws ServletException, IOException {
 
-        final String authorizationHeader = request.getHeader("Authorization");
+        final String authorizationHeader = request.getHeader("X-Token");
 
         String username = null;
         String jwt = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
+       // JWT Token
+       // if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+       //     jwt = authorizationHeader.substring(7);
+       //     username = jwtUtil.extractUsername(jwt);
+       // }
+
+        if (authorizationHeader != null ) {
+            jwt = authorizationHeader;
             username = jwtUtil.extractUsername(jwt);
         }
+
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 

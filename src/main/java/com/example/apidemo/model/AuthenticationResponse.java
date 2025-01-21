@@ -1,8 +1,14 @@
 package com.example.apidemo.model;
 
-import lombok.Data;
 
-@Data
 public class AuthenticationResponse {
-    private final String jwt;
+    private final String token;
+
+    public AuthenticationResponse(String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
 }

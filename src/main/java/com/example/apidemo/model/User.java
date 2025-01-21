@@ -1,7 +1,6 @@
 package com.example.apidemo.model;
 
 import lombok.Data;
-
 import javax.persistence.*;
 import java.util.Set;
 
@@ -25,4 +24,8 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
+
+    // 新增字段
+    private String avatar;
+    private String introduction;
 }

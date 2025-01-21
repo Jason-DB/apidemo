@@ -1,5 +1,6 @@
 package com.example.apidemo.controller;
 
+import com.example.apidemo.model.ApiResponse;
 import com.example.apidemo.model.Permission;
 import com.example.apidemo.model.Role;
 import com.example.apidemo.model.User;
@@ -35,141 +36,150 @@ public class AdminController {
 
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('" + Permissions.VIEW_USERS + "')")
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public ApiResponse<List<User>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return new ApiResponse<>(20000, users);
     }
 
     @PostMapping("/users")
     @PreAuthorize("hasAuthority('" + Permissions.CREATE_USER + "')")
-    public ResponseEntity<?> createUser(@RequestBody User user) {
+    public ApiResponse<User> createUser(@RequestBody User user) {
         try {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-            return ResponseEntity.ok(userRepository.save(user));
+            User savedUser = userRepository.save(user);
+            return new ApiResponse<>(20000, savedUser);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
+            return new ApiResponse<>(50012, null);
         }
     }
 
     @PutMapping("/users/{id}")
     @PreAuthorize("hasAuthority('" + Permissions.UPDATE_USER + "')")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+    public ApiResponse<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         try {
             User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
             user.setUsername(updatedUser.getUsername());
             user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
             user.setEnabled(updatedUser.isEnabled());
-            return ResponseEntity.ok(userRepository.save(user));
+            User savedUser = userRepository.save(user);
+            return new ApiResponse<>(20000, savedUser);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
+            return new ApiResponse<>(50012, null);
         }
     }
 
     @DeleteMapping("/users/{id}")
     @PreAuthorize("hasAuthority('" + Permissions.DELETE_USER + "')")
-    public String deleteUser(@PathVariable Long id) {
+    public ApiResponse<String> deleteUser(@PathVariable Long id) {
         userRepository.deleteById(id);
-        return "User deleted successfully";
+        return new ApiResponse<>(20000, null);
     }
 
     @PutMapping("/users/{id}/reset-password")
     @PreAuthorize("hasAuthority('" + Permissions.RESET_PASSWORD + "')")
-    public String resetPassword(@PathVariable Long id, @RequestBody String newPassword) {
+    public ApiResponse<String> resetPassword(@PathVariable Long id, @RequestBody String newPassword) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-        return "Password reset successfully";
+        return new ApiResponse<>(20000, null);
     }
 
     @PutMapping("/users/{id}/assign-role")
     @PreAuthorize("hasAuthority('" + Permissions.ASSIGN_ROLE + "')")
-    public String assignRoleToUser(@PathVariable Long id, @RequestBody Long roleId) {
+    public ApiResponse<String> assignRoleToUser(@PathVariable Long id, @RequestBody Long roleId) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
         Role role = roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found"));
         user.getRoles().add(role);
         userRepository.save(user);
-        return "Role assigned successfully";
+        return new ApiResponse<>(20000, null);
     }
 
     @PutMapping("/roles/{id}/assign-permission")
     @PreAuthorize("hasAuthority('" + Permissions.ASSIGN_PERMISSION + "')")
-    public String assignPermissionToRole(@PathVariable Long id, @RequestBody Long permissionId) {
+    public ApiResponse<String> assignPermissionToRole(@PathVariable Long id, @RequestBody Long permissionId) {
         Role role = roleRepository.findById(id).orElseThrow(() -> new RuntimeException("Role not found"));
         Permission permission = permissionRepository.findById(permissionId).orElseThrow(() -> new RuntimeException("Permission not found"));
         role.getPermissions().add(permission);
         roleRepository.save(role);
-        return "Permission assigned successfully";
+        return new ApiResponse<>(20000, null);
     }
 
     // 角色管理
     @GetMapping("/roles")
     @PreAuthorize("hasAuthority('" + Permissions.MANAGE_ROLES + "')")
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
+    public ApiResponse<List<Role>> getAllRoles() {
+        List<Role> roles = roleRepository.findAll();
+        return new ApiResponse<>(20000, roles);
     }
 
     @PostMapping("/roles")
     @PreAuthorize("hasAuthority('" + Permissions.MANAGE_ROLES + "')")
-    public ResponseEntity<?> createRole(@RequestBody Role role) {
+    public ApiResponse<Role> createRole(@RequestBody Role role) {
         try {
-            return ResponseEntity.ok(roleRepository.save(role));
+            Role savedRole = roleRepository.save(role);
+            return new ApiResponse<>(20000, savedRole);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Role name already exists");
+            return new ApiResponse<>(50012, null);
         }
     }
 
     @PutMapping("/roles/{id}")
     @PreAuthorize("hasAuthority('" + Permissions.MANAGE_ROLES + "')")
-    public ResponseEntity<?> updateRole(@PathVariable Long id, @RequestBody Role updatedRole) {
+    public ApiResponse<Role> updateRole(@PathVariable Long id, @RequestBody Role updatedRole) {
         try {
             Role role = roleRepository.findById(id).orElseThrow(() -> new RuntimeException("Role not found"));
             role.setName(updatedRole.getName());
-            return ResponseEntity.ok(roleRepository.save(role));
+            Role savedRole = roleRepository.save(role);
+            return new ApiResponse<>(20000, savedRole);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Role name already exists");
+            return new ApiResponse<>(50012, null);
         }
     }
 
     @DeleteMapping("/roles/{id}")
     @PreAuthorize("hasAuthority('" + Permissions.MANAGE_ROLES + "')")
-    public String deleteRole(@PathVariable Long id) {
+    public ApiResponse<String> deleteRole(@PathVariable Long id) {
         roleRepository.deleteById(id);
-        return "Role deleted successfully";
+        return new ApiResponse<>(20000, null);
     }
 
     // 权限管理
     @GetMapping("/permissions")
     @PreAuthorize("hasAuthority('" + Permissions.MANAGE_PERMISSIONS + "')")
-    public List<Permission> getAllPermissions() {
-        return permissionRepository.findAll();
+    public ApiResponse<List<Permission>> getAllPermissions() {
+        List<Permission> permissions = permissionRepository.findAll();
+        return new ApiResponse<>(20000, permissions);
     }
 
     @PostMapping("/permissions")
     @PreAuthorize("hasAuthority('" + Permissions.MANAGE_PERMISSIONS + "')")
-    public ResponseEntity<?> createPermission(@RequestBody Permission permission) {
+    public ApiResponse<Permission> createPermission(@RequestBody Permission permission) {
         try {
-            return ResponseEntity.ok(permissionRepository.save(permission));
+            Permission savedPermission = permissionRepository.save(permission);
+            return new ApiResponse<>(20000, savedPermission);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Permission name already exists");
+            return new ApiResponse<>(50012, null);
         }
     }
 
     @PutMapping("/permissions/{id}")
     @PreAuthorize("hasAuthority('" + Permissions.MANAGE_PERMISSIONS + "')")
-    public ResponseEntity<?> updatePermission(@PathVariable Long id, @RequestBody Permission updatedPermission) {
+    public ApiResponse<Permission> updatePermission(@PathVariable Long id, @RequestBody Permission updatedPermission) {
         try {
             Permission permission = permissionRepository.findById(id).orElseThrow(() -> new RuntimeException("Permission not found"));
             permission.setName(updatedPermission.getName());
             permission.setDescription(updatedPermission.getDescription());
-            return ResponseEntity.ok(permissionRepository.save(permission));
+            Permission savedPermission = permissionRepository.save(permission);
+            return new ApiResponse<>(20000, savedPermission);
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Permission name already exists");
+            return new ApiResponse<>(50012, null);
         }
     }
 
     @DeleteMapping("/permissions/{id}")
     @PreAuthorize("hasAuthority('" + Permissions.MANAGE_PERMISSIONS + "')")
-    public String deletePermission(@PathVariable Long id) {
+    public ApiResponse<String> deletePermission(@PathVariable Long id) {
         permissionRepository.deleteById(id);
-        return "Permission deleted successfully";
+        return new ApiResponse<>(20000, null);
     }
 }

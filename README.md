@@ -123,6 +123,7 @@ public class Permissions {
 4.调整SecurityConfig.java中的配置项，将不需要权限的控制器如注册、登录排除。
 =============================================================================================
  Swagger（OpenAPI）自动生成 API 的接口说明文档
+ http://localhost:8080/swagger-ui/
 1.使用 Springfox 集成 Swagger：
 <dependency>
     <groupId>io.springfox</groupId>
@@ -195,3 +196,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 }
+=========================================================
+为实现前端跨域访问，需要新增全局跨域配置文件CorsConfig.java
